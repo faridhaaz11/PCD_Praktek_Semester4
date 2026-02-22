@@ -1,0 +1,142 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<h2 class="text-center">Unggah Citra Digital untuk Analisis RGB</h2>
+<p class="text-center text-muted">Upload gambar untuk mendapatkan histogram dan matriks piksel RGB</p>
+
+<form
+  action="/upload/"
+  enctype="multipart/form-data"
+  method="post"
+  class="mt-4"
+>
+  <div class="mb-3">
+    <label class="form-label">Pilih File Gambar:</label>
+    <input
+      name="file"
+      type="file"
+      accept="image/*"
+      class="form-control"
+      required
+    />
+  </div>
+  <div class="text-center">
+    <input type="submit" value="Upload & Analisis" class="btn btn-primary" />
+  </div>
+</form>
+
+<h2 class="text-center mt-5">Operasi Aritmatika pada Citra</h2>
+  <form
+    action="/operation/"
+    enctype="multipart/form-data"
+    method="post"
+    class="mt-4"
+  >
+    <div class="mb-3">
+      <label for="file">Pilih Gambar:</label>
+      <input
+        name="file"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="operation">Pilih Operasi:</label>
+      <select name="operation" class="form-select" required>
+        <option value="add">Tambah</option>
+        <option value="subtract">Kurang</option>
+        <option value="max">Max</option>
+        <option value="min">Min</option>
+        <option value="inverse">Inverse</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="value">Nilai Operasi (Range):</label>
+      <input
+        type="range"
+        class="form-range"
+        min="0"
+        max="100"
+        step="1"
+        name="value"
+        id="value"
+        value="50"
+      />
+      <output id="valueOutput" class="form-text">50</output>
+    </div>
+    <div class="text-center">
+      <input type="submit" value="Lakukan Operasi" class="btn btn-primary" />
+    </div>
+  </form>
+
+  <h2 class="text-center mt-5">Operasi Logika pada Citra</h2>
+  <form
+    action="/logic_operation/"
+    enctype="multipart/form-data"
+    method="post"
+    class="mt-4"
+  >
+    <div class="mb-3">
+      <label for="file1">Pilih Gambar 1:</label>
+      <input
+        name="file1"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="file2">Pilih Gambar 2 (Untuk operasi AND dan XOR):</label>
+      <input name="file2" type="file" accept="image/*" class="form-control" />
+    </div>
+    <div class="mb-3">
+      <label for="operation">Pilih Operasi:</label>
+      <select name="operation" class="form-select" required>
+        <option value="not">NOT</option>
+        <option value="and">AND</option>
+        <option value="xor">XOR</option>
+      </select>
+    </div>
+    <div class="text-center">
+      <input
+        type="submit"
+        value="Lakukan Operasi Logika"
+        class="btn btn-primary"
+      />
+    </div>
+  </form>
+
+  <h2 class="text-center mt-5">Statistik Citra</h2>
+  <form
+    action="/statistics/"
+    enctype="multipart/form-data"
+    method="post"
+    class="mt-4"
+  >
+    <div class="mb-3">
+      <label for="file">Pilih Gambar:</label>
+      <input
+        name="file"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="text-center">
+      <input type="submit" value="Hitung Statistik" class="btn btn-primary" />
+    </div>
+  </form>
+
+  <script>
+    const slider = document.getElementById("value");
+    const output = document.getElementById("valueOutput");
+    slider.addEventListener("input", function () {
+      output.textContent = slider.value;
+    });
+  </script>
+</div>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %}Histogram Equalization{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center">Equalisasi Histogram Citra</h2>
+  <form
+    action="/equalize/"
+    enctype="multipart/form-data"
+    method="post"
+    class="mt-4"
+  >
+    <div class="mb-3">
+      <input
+        name="file"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="text-center">
+      <input
+        type="submit"
+        value="Equalisasi Histogram"
+        class="btn btn-primary"
+      />
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %} {% block title %}Hasil Analisis - {{ filename }}{% endblock %} {% block content %}
+
+<style>
+    .card {
+        margin-bottom: 20px;
+    }
+    .matrix-container {
+        max-height: 500px;
+        overflow: auto;
+        border: 1px solid #dee2e6;
+    }
+    .pixel-table {
+        border-collapse: separate;
+        border-spacing: 2px;
+        margin: 0 auto;
+    }
+    .pixel-cell {
+        width: 45px;
+        height: 45px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+        font-weight: bold;
+        border: 1px solid #ccc;
+    }
+</style>
+
+<h2 class="text-center mb-4">Hasil Analisis Citra Digital</h2>
+
+<!-- Info File -->
+<div class="alert alert-info text-center">
+    <strong>{{ filename }}</strong> | Ukuran: {{ original_width }} x {{ original_height }} px
+</div>
+
+<!-- Gambar Asli -->
+<div class="card">
+    <div class="card-header bg-primary text-white">Gambar yang Diunggah</div>
+    <div class="card-body text-center">
+        <img src="{{ image_path }}" class="img-fluid rounded shadow" alt="Uploaded Image" style="max-height: 300px;">
+    </div>
+</div>
+
+<!-- Histogram -->
+<div class="card">
+    <div class="card-header bg-success text-white">Histogram Warna RGB</div>
+    <div class="card-body text-center">
+        <img src="{{ hist_path }}" class="img-fluid" alt="Color Histogram" style="max-height: 400px;">
+        <p class="text-muted mt-2">
+            <small>Histogram menunjukkan distribusi intensitas piksel (0-255) untuk setiap channel warna</small>
+        </p>
+    </div>
+</div>
+
+<!-- Matriks Pixel RGB -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        Matriks Piksel RGB
+        <span class="badge bg-light text-dark ms-2">{{ matrix_width }} x {{ matrix_height }} piksel</span>
+    </div>
+    <div class="card-body">
+        <p class="text-muted text-center"><small>Setiap sel menampilkan nilai Red, Green, Blue (0-255)</small></p>
+        <div class="matrix-container p-3">
+            <table class="pixel-table">
+                {% for row in matrix_data %}
+                <tr>
+                    {% for pixel in row %}
+                    <td class="pixel-cell" 
+                        style="background-color: rgb({{ pixel.r }}, {{ pixel.g }}, {{ pixel.b }}); color: {% if (pixel.r + pixel.g + pixel.b) / 3 > 128 %}#000{% else %}#fff{% endif %};">
+                        {{ pixel.r }}<br>{{ pixel.g }}<br>{{ pixel.b }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4 mb-5">
+    <a href="/" class="btn btn-primary">Unggah Gambar Lain</a>
+</div>
+
+{% endblock %}

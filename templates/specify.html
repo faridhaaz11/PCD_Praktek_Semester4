@@ -1,0 +1,40 @@
+{% extends "base.html" %} {% block title %}Histogram Specification{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center">Spesifikasi Histogram Citra</h2>
+  <form
+    action="/specify/"
+    enctype="multipart/form-data"
+    method="post"
+    class="mt-4"
+  >
+    <div class="mb-3">
+      <label for="file">Pilih Gambar yang Akan Diubah:</label>
+      <input
+        name="file"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="ref_file">Pilih Gambar Referensi:</label>
+      <input
+        name="ref_file"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="text-center">
+      <input
+        type="submit"
+        value="Spesifikasi Histogram"
+        class="btn btn-primary"
+      />
+    </div>
+  </form>
+</div>
+{% endblock %}

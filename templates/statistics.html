@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Statistik Citra{% endblock %} {%
+block content %}
+<div class="container mt-5">
+  <h2 class="text-center">Statistik Citra</h2>
+  <div class="text-center">
+    <img
+      src="{{ image_path }}"
+      alt="Image for Statistics"
+      class="img-fluid rounded shadow-lg mb-4"
+    />
+  </div>
+  <h4 class="text-center">Rata-rata Intensitas Piksel: {{ mean_intensity }}</h4>
+  <h4 class="text-center">Standar Deviasi (Kontras): {{ std_deviation }}</h4>
+  <div class="text-center mt-4">
+    <a href="/" class="btn btn-secondary">Kembali ke Home</a>
+  </div>
+</div>
+{% endblock %}

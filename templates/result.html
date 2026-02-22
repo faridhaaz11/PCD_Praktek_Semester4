@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block title %}Hasil Operasi Citra{% endblock %} {%
+block content %}
+<div class="container mt-5">
+  <h2 class="text-center">Perbandingan Citra Asli dan Hasil Operasi</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="text-center">Gambar Asli</h4>
+      <div class="text-center">
+        <img
+          src="{{ original_image_path }}"
+          alt="Original Image"
+          class="img-fluid rounded shadow-lg mb-4"
+        />
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4 class="text-center">Gambar Hasil</h4>
+      <div class="text-center">
+        <img
+          src="{{ modified_image_path }}"
+          alt="Modified Image"
+          class="img-fluid rounded shadow-lg mb-4"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-4">
+    <a href="/" class="btn btn-secondary">Kembali ke Home</a>
+  </div>
+</div>
+{% endblock %}

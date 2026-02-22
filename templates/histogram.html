@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% block title %}Generate Image Histogram{% endblock
+%} {% block content %}
+<div class="container mt-5">
+  <h2 class="text-center">Generate Histogram Citra</h2>
+  <form
+    action="/histogram/"
+    enctype="multipart/form-data"
+    method="post"
+    class="mt-4"
+  >
+    <div class="mb-3">
+      <input
+        name="file"
+        type="file"
+        accept="image/*"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="text-center">
+      <input type="submit" value="Generate Histogram" class="btn btn-primary" />
+    </div>
+  </form>
+
+  {% if grayscale_histogram_path and color_histogram_path %}
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <h4 class="text-center">Histogram Grayscale</h4>
+      <img
+        src="{{ grayscale_histogram_path }}"
+        alt="Grayscale Histogram"
+        class="img-fluid rounded shadow-lg mb-4"
+      />
+    </div>
+    <div class="col-md-6">
+      <h4 class="text-center">Histogram Berwarna</h4>
+      <img
+        src="{{ color_histogram_path }}"
+        alt="Color Histogram"
+        class="img-fluid rounded shadow-lg mb-4"
+      />
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
