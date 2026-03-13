@@ -1,4 +1,5 @@
 import os
+from typing import Annotated, Optional
 from uuid import uuid4
 from fastapi import FastAPI, File, UploadFile, Request, Form
 from fastapi.responses import HTMLResponse
@@ -65,7 +66,7 @@ async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 @app.post("/upload/", response_class=HTMLResponse)
-async def upload_image(request: Request, file: UploadFile = File(...)):
+async def upload_image(request: Request, file: Annotated[UploadFile, File(...)]):
     image_data = await file.read()
     file_extension = file.filename.split(".")[-1].lower()
     filename = f"{uuid4()}.{file_extension}"
@@ -76,7 +77,7 @@ async def upload_image(request: Request, file: UploadFile = File(...)):
 
     np_array = np.frombuffer(image_data, np.uint8)
     img = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-    height, width, channels = img.shape
+    height, width, _ = img.shape
     
     # Buat histogram
     hist_filename = create_histogram_chart(img, filename)
@@ -113,9 +114,9 @@ async def upload_image(request: Request, file: UploadFile = File(...)):
 @app.post("/operation/", response_class=HTMLResponse)
 async def perform_operation(
     request: Request,
-    file: UploadFile = File(...),
-    operation: str = Form(...),
-    value: int = Form(...)
+    file: Annotated[UploadFile, File(...)],
+    operation: Annotated[str, Form(...)],
+    value: Annotated[int, Form(...)]
 ):
     image_data = await file.read()
     np_array = np.frombuffer(image_data, np.uint8)
@@ -145,9 +146,9 @@ async def perform_operation(
 @app.post("/logic_operation/", response_class=HTMLResponse)
 async def perform_logic_operation(
     request: Request,
-    file1: UploadFile = File(...),
-    file2: UploadFile = File(None),
-    operation: str = Form(...)
+    file1: Annotated[UploadFile, File(...)],
+    operation: Annotated[str, Form(...)],
+    file2: Annotated[Optional[UploadFile], File()] = None,
 ):
     image_data1 = await file1.read()
     np_array1 = np.frombuffer(image_data1, np.uint8)
@@ -163,6 +164,12 @@ async def perform_logic_operation(
         image_data2 = await file2.read()
         np_array2 = np.frombuffer(image_data2, np.uint8)
         img2 = cv2.imdecode(np_array2, cv2.IMREAD_COLOR)
+
+        if img2 is None:
+            return HTMLResponse("Gambar kedua tidak dapat dibaca.", status_code=400)
+
+        if img1.shape[:2] != img2.shape[:2]:
+            img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]), interpolation=cv2.INTER_AREA)
 
         if operation == "and":
             result_img = cv2.bitwise_and(img1, img2)
@@ -183,7 +190,7 @@ async def grayscale_form(request: Request):
     return templates.TemplateResponse("grayscale.html", {"request": request})
 
 @app.post("/grayscale/", response_class=HTMLResponse)
-async def convert_grayscale(request: Request, file: UploadFile = File(...)):
+async def convert_grayscale(request: Request, file: Annotated[UploadFile, File(...)]):
     image_data = await file.read()
     np_array = np.frombuffer(image_data, np.uint8)
     img = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
@@ -205,7 +212,7 @@ async def histogram_form(request: Request):
     return templates.TemplateResponse("histogram.html", {"request": request})
 
 @app.post("/histogram/", response_class=HTMLResponse)
-async def generate_histogram(request: Request, file: UploadFile = File(...)):
+async def generate_histogram(request: Request, file: Annotated[UploadFile, File(...)]):
     image_data = await file.read()
     np_array = np.frombuffer(image_data, np.uint8)
     img = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
@@ -232,7 +239,7 @@ async def equalize_form(request: Request):
     return templates.TemplateResponse("equalize.html", {"request": request})
 
 @app.post("/equalize/", response_class=HTMLResponse)
-async def equalize_histogram(request: Request, file: UploadFile = File(...)):
+async def equalize_histogram(request: Request, file: Annotated[UploadFile, File(...)]):
     image_data = await file.read()
     np_array = np.frombuffer(image_data, np.uint8)
     img = cv2.imdecode(np_array, cv2.IMREAD_GRAYSCALE)
@@ -254,7 +261,7 @@ async def specify_form(request: Request):
     return templates.TemplateResponse("specify.html", {"request": request})
 
 @app.post("/specify/", response_class=HTMLResponse)
-async def specify_histogram(request: Request, file: UploadFile = File(...), ref_file: UploadFile = File(...)):
+async def specify_histogram(request: Request, file: Annotated[UploadFile, File(...)], ref_file: Annotated[UploadFile, File(...)]):
     # Baca gambar yang diunggah dan gambar referensi
     image_data = await file.read()
     ref_image_data = await ref_file.read()
@@ -289,7 +296,7 @@ async def specify_histogram(request: Request, file: UploadFile = File(...), ref_
     })
 
 @app.post("/statistics/", response_class=HTMLResponse)
-async def calculate_statistics(request: Request, file: UploadFile = File(...)):
+async def calculate_statistics(request: Request, file: Annotated[UploadFile, File(...)]):
     image_data = await file.read()
     np_array = np.frombuffer(image_data, np.uint8)
     img = cv2.imdecode(np_array, cv2.IMREAD_GRAYSCALE)
