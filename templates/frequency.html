@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Frequency Domain Processing{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center">Pemrosesan Citra (Konversi dari Colab)</h2>
+  <p class="text-center text-muted">
+    Upload gambar lalu pilih operasi convolution, filtering, Fourier transform, atau reduksi noise periodik.
+  </p>
+
+  <form action="/frequency/" enctype="multipart/form-data" method="post" class="mt-4">
+    <div class="mb-3">
+      <label for="file" class="form-label">Pilih Gambar:</label>
+      <input name="file" type="file" accept="image/*" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="operation" class="form-label">Pilih Operasi:</label>
+      <select name="operation" class="form-select" required>
+        <option value="conv_average">Convolution - Average</option>
+        <option value="conv_sharpen">Convolution - Sharpen</option>
+        <option value="conv_edge">Convolution - Edge</option>
+        <option value="zero_padding">Zero Padding (20 piksel)</option>
+        <option value="low_pass">Low Pass Filter</option>
+        <option value="high_pass">High Pass Filter</option>
+        <option value="band_pass">Band Pass Filter</option>
+        <option value="fourier">Fourier Transform (Magnitude Spectrum)</option>
+        <option value="reduce_periodic_noise">Reduce Periodic Noise</option>
+      </select>
+    </div>
+
+    <div class="text-center">
+      <input type="submit" value="Proses Gambar" class="btn btn-primary" />
+    </div>
+  </form>
+
+  {% if original_image_path and modified_image_path %}
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <h4 class="text-center">Gambar Asli</h4>
+      <img src="{{ original_image_path }}" alt="Original" class="img-fluid rounded shadow-lg mb-4" />
+    </div>
+    <div class="col-md-6">
+      <h4 class="text-center">Hasil ({{ selected_operation }})</h4>
+      <img src="{{ modified_image_path }}" alt="Processed" class="img-fluid rounded shadow-lg mb-4" />
+    </div>
+  </div>
+  <div class="text-center mb-4">
+    <a href="/frequency/" class="btn btn-secondary">Kembali</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

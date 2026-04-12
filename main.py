@@ -61,6 +61,85 @@ def create_histogram_chart(img, filename):
     
     return hist_filename
 
+
+def normalize_to_uint8(image):
+    """Normalize float or wide-range image arrays into uint8 for saving/display."""
+    if image is None:
+        return None
+
+    if image.dtype == np.uint8:
+        return image
+
+    normalized = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
+    return normalized.astype(np.uint8)
+
+
+def apply_convolution(image, kernel_type="average"):
+    if kernel_type == "average":
+        kernel = np.ones((3, 3), np.float32) / 9
+    elif kernel_type == "sharpen":
+        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    elif kernel_type == "edge":
+        kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+    else:
+        return image
+
+    return cv2.filter2D(image, -1, kernel)
+
+
+def apply_zero_padding(image, padding_size=20):
+    return cv2.copyMakeBorder(
+        image,
+        padding_size,
+        padding_size,
+        padding_size,
+        padding_size,
+        cv2.BORDER_CONSTANT,
+        value=[0, 0, 0],
+    )
+
+
+def apply_filter(image, filter_type="low"):
+    if filter_type == "low":
+        return cv2.GaussianBlur(image, (5, 5), 0)
+
+    if filter_type == "high":
+        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+        return cv2.filter2D(image, -1, kernel)
+
+    if filter_type == "band":
+        low_pass = cv2.GaussianBlur(image, (9, 9), 0)
+        high_pass = cv2.subtract(image, low_pass)
+        return cv2.add(low_pass, high_pass)
+
+    return image
+
+
+def apply_fourier_transform(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    f = np.fft.fft2(gray)
+    fshift = np.fft.fftshift(f)
+    magnitude_spectrum = 20 * np.log(np.abs(fshift) + 1)
+    return normalize_to_uint8(magnitude_spectrum)
+
+
+def reduce_periodic_noise(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    f = np.fft.fft2(gray)
+    fshift = np.fft.fftshift(f)
+
+    rows, cols = gray.shape
+    crow, ccol = rows // 2, cols // 2
+    mask = np.ones((rows, cols), np.uint8)
+    radius = 30
+    mask[crow - radius:crow + radius, ccol - radius:ccol + radius] = 0
+
+    fshift = fshift * mask
+    f_ishift = np.fft.ifftshift(fshift)
+    img_back = np.fft.ifft2(f_ishift)
+    img_back = np.abs(img_back)
+    return normalize_to_uint8(img_back)
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
@@ -312,6 +391,61 @@ async def calculate_statistics(request: Request, file: Annotated[UploadFile, Fil
         "std_deviation": std_deviation,
         "image_path": image_path
     })
+
+
+@app.get("/frequency/", response_class=HTMLResponse)
+async def frequency_form(request: Request):
+    return templates.TemplateResponse("frequency.html", {"request": request})
+
+
+@app.post("/frequency/", response_class=HTMLResponse)
+async def process_frequency(
+    request: Request,
+    file: Annotated[UploadFile, File(...)],
+    operation: Annotated[str, Form(...)],
+):
+    image_data = await file.read()
+    np_array = np.frombuffer(image_data, np.uint8)
+    img = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
+    if img is None:
+        return HTMLResponse("Gambar tidak dapat dibaca", status_code=400)
+
+    original_path = save_image(img, "freq_original")
+
+    if operation == "conv_average":
+        result_img = apply_convolution(img, "average")
+    elif operation == "conv_sharpen":
+        result_img = apply_convolution(img, "sharpen")
+    elif operation == "conv_edge":
+        result_img = apply_convolution(img, "edge")
+    elif operation == "zero_padding":
+        result_img = apply_zero_padding(img, 20)
+    elif operation == "low_pass":
+        result_img = apply_filter(img, "low")
+    elif operation == "high_pass":
+        result_img = apply_filter(img, "high")
+    elif operation == "band_pass":
+        result_img = apply_filter(img, "band")
+    elif operation == "fourier":
+        result_img = apply_fourier_transform(img)
+    elif operation == "reduce_periodic_noise":
+        result_img = reduce_periodic_noise(img)
+    else:
+        return HTMLResponse("Operasi tidak dikenali", status_code=400)
+
+    result_img = normalize_to_uint8(result_img)
+    result_path = save_image(result_img, operation)
+
+    return templates.TemplateResponse(
+        "frequency.html",
+        {
+            "request": request,
+            "original_image_path": original_path,
+            "modified_image_path": result_path,
+            "selected_operation": operation,
+        },
+    )
 
 def save_image(image, prefix):
     filename = f"{prefix}_{uuid4()}.png"
